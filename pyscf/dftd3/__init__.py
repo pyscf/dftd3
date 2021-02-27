@@ -16,5 +16,7 @@
 # Author: Qiming Sun <osirpt.sun@gmail.com>
 #
 
+__version__ = '0.0.1'
+
 from pyscf.dftd3 import itrf
 from pyscf.dftd3.itrf import dftd3, grad
