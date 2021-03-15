@@ -25,6 +25,8 @@ metadata = globals()
 import os
 import sys
 from setuptools import setup, find_namespace_packages, Extension
+from setuptools.command.build_ext import build_ext
+from distutils.errors import DistutilsExecError
 
 topdir = os.path.abspath(os.path.join(__file__, '..'))
 modules = find_namespace_packages(include=['pyscf.*'])
@@ -43,33 +45,23 @@ def guess_version():
 if not metadata.get('VERSION', None):
     VERSION = guess_version()
 
-pyscf_lib_dir = os.path.join(topdir, 'pyscf', 'lib')
-def make_ext(pkg_name, srcs,
-             libraries=[], library_dirs=[pyscf_lib_dir],
-             include_dirs=[], extra_compile_flags=[],
-             extra_link_flags=[], **kwargs):
-    if sys.platform.startswith('darwin'):  # OSX
-        from distutils.sysconfig import get_config_vars
-        conf_vars = get_config_vars()
-        conf_vars['LDSHARED'] = conf_vars['LDSHARED'].replace('-bundle', '-dynamiclib')
-        conf_vars['CCSHARED'] = " -dynamiclib"
-        conf_vars['EXT_SUFFIX'] = '.dylib'
-        soname = pkg_name.split('.')[-1]
-        extra_link_flags = extra_link_flags + ['-install_name', f'@loader_path/{soname}.dylib']
-        runtime_library_dirs = []
-    else:
-        extra_compile_flags = extra_compile_flags + ['-fopenmp']
-        extra_link_flags = extra_link_flags + ['-fopenmp']
-        runtime_library_dirs = ['$ORIGIN', '.']
-    os.path.join(topdir, *pkg_name.split('.')[:-1])
-    return Extension(pkg_name, srcs,
-                     libraries = libraries,
-                     library_dirs = library_dirs,
-                     include_dirs = include_dirs + library_dirs,
-                     extra_compile_args = extra_compile_flags,
-                     extra_link_args = extra_link_flags,
-                     runtime_library_dirs = runtime_library_dirs,
-                     **kwargs)
+
+class CustomBuildExt(build_ext):
+    def run(self):
+        commands = '''
+git clone https://github.com/cuanto/libdftd3
+make -C libdftd3
+mv libdftd3/lib/libdftd3.so pyscf/dftd3/
+'''
+        try:
+            self.spawn(['bash', '-c', commands])
+        except DistutilsExecError:
+            self.warn('Failed to compile dftd3-lib')
+            raise
+
+from distutils.command.build import build
+build.sub_commands = ([c for c in build.sub_commands if c[0] == 'build_ext'] +
+                      [c for c in build.sub_commands if c[0] != 'build_ext'])
 
 settings = {
     'name': metadata.get('NAME', None),
@@ -79,10 +71,10 @@ settings = {
     'author_email': metadata.get('AUTHOR_EMAIL', None),
     'install_requires': metadata.get('DEPENDENCIES', []),
 }
-if 'SO_EXTENSIONS' in metadata:
-    settings['ext_modules'] = [make_ext(k, v) for k, v in SO_EXTENSIONS.items()]
 setup(
     include_package_data=True,
     packages=modules,
+    ext_modules=[Extension('pyscf_lib_placeholder', [])],
+    cmdclass={'build_ext': CustomBuildExt},
     **settings
 )
