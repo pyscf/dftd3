@@ -21,10 +21,6 @@ DFT-D3 interface.
 
 This interface is based on the open source project
 https://github.com/cuanto/libdftd3
-
-After compiling the libdftd3 library, you need to update the settings.py or
-environment variable DFTD3PATH to point to the directory where the shared
-object file libdftd3.so locates.
 '''
 
 import os, sys
@@ -33,24 +29,8 @@ import numpy
 from pyscf import lib
 from pyscf import gto
 from pyscf.lib import logger
-from pyscf import __config__
 
-try:
-    from pyscf.dftd3 import settings
-except ImportError:
-    settings = lambda: None
-    settings.DFTD3PATH = getattr(__config__, 'dftd3_DFTD3PATH', os.environ.get('DFTD3PATH'))
-
-if settings.DFTD3PATH:
-    libdftd3 = numpy.ctypeslib.load_library('libdftd3', settings.DFTD3PATH)
-else:
-    raise ImportError('library libdftd3 not found')
-
-
-# For code compatibility in python-2 and python-3
-if sys.version_info >= (3,):
-    unicode = str
-
+libdftd3 = numpy.ctypeslib.load_library('libdftd3', os.path.dirname(__file__))
 
 FUNC_CODE = {
     # mf.xc          name in dftd3 library      dftd3 versions
@@ -316,7 +296,7 @@ class _DFTD3Grad:
 def _get_basis_type(mol):
     def classify(mol_basis):
         basis_type = 'other'
-        if isinstance(mol_basis, (str, unicode)):
+        if isinstance(mol_basis, str):
             mol_basis = gto.basis._format_basis_name(mol_basis)
             if mol_basis[:6] == 'def2tz':
                 basis_type = 'def2-TZ'
