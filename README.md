@@ -9,7 +9,7 @@ Install
 -------
 * Install to python site-packages folder
 ```
-pip install https://github.com/pyscf/dftd3
+pip install git+https://github.com/pyscf/dftd3
 ```
 
 * Install in a custom folder for development
