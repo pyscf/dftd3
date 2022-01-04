@@ -261,7 +261,7 @@ class DFTD3Dispersion(lib.StreamObject):
         # dft-d3 has special treatment for def2-TZ basis
         tz = (basis_type == 'def2-TZ')
 
-        coords = mol.atom_coords()
+        coords = numpy.asfortranarray(mol.atom_coords())
         nuc_types = [gto.charge(mol.atom_symbol(ia))
                      for ia in range(mol.natm)]
         nuc_types = numpy.asarray(nuc_types, dtype=numpy.int32)

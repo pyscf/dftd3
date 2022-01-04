@@ -19,27 +19,42 @@ from pyscf import gto, scf
 
 try:
     from pyscf.dftd3 import dftd3
+    from pyscf.dftd3 import itrf
 except ImportError:
     dftd3 = False
 
-mol = gto.M(atom='''
-    O  0.   0.       0.
-    H  0.   -0.757   0.587
-    H  0.   0.757    0.587
-            ''', symmetry=True)
-
-def tearDownModule():
-    global mol
-    del mol
 
 @unittest.skipIf(not dftd3, "library dftd3 not found.")
 class KnownValues(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+
+        cls._h2o = gto.M(atom='''
+                         O  0.   0.       0.
+                         H  0.   -0.757   0.587
+                         H  0.   0.757    0.587
+                         ''', symmetry=True)
+
+        cls._ch4 = gto.M(atom='''
+                         H 0.000000000000 0.000000000000 0.000000000000
+                         C 0.000000000000 0.000000000000 1.087900000000
+                         H 1.025681956337 0.000000000000 1.450533333333
+                         H -0.512840978169 0.888266630391 1.450533333333
+                         H -0.512840978169 -0.888266630391 1.450533333333
+                         ''')
+
+    def test_dftd3(self):
+        d3 = itrf.DFTD3Dispersion(self._ch4)
+        d3.xc = 'B3LYP'
+        self.assertAlmostEqual(d3.kernel()[0], -0.0019136221730972761, delta=1.e-12)
+
     def test_dftd3_scf(self):
-        mf = dftd3(scf.RHF(mol))
-        self.assertAlmostEqual(mf.kernel(), -74.96757204541478, 0)
+        mf = dftd3(scf.RHF(self._h2o))
+        self.assertAlmostEqual(mf.kernel(), -74.96757204541478, delta=1.e-8)
 
     def test_dftd3_scf_grad(self):
-        mf = dftd3(scf.RHF(mol)).run()
+        mf = dftd3(scf.RHF(self._h2o)).run()
         mfs = mf.as_scanner()
         e1 = mfs(''' O  0.   0.  0.0001; H  0.   -0.757   0.587; H  0.   0.757    0.587 ''')
         e2 = mfs(''' O  0.   0. -0.0001; H  0.   -0.757   0.587; H  0.   0.757    0.587 ''')
