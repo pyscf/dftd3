@@ -317,8 +317,8 @@ def _get_basis_type(mol):
                 break
         if (len(basis_types) > 1 and
             all(b == basis_type for b in basis_types)):
-            logger.warn('Mutliple types of basis found in mol.basis. '
-                        'Type %s is applied\n' % basis_type)
+            logger.warn(mol, 'Mutliple types of basis found in mol.basis. '
+                        'Type %s is applied\n', basis_type)
     else:
         basis_type = classify(mol.basis)
     return basis_type
