@@ -16,7 +16,16 @@
 # Author: Qiming Sun <osirpt.sun@gmail.com>
 #
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
-from pyscf.dftd3 import itrf
-from pyscf.dftd3.itrf import dftd3, grad
+import warnings
+
+warnings.warn('''
+pyscf-dftd3 extension is deprecated. It is recommended to use the newest DFTD3
+and DFTD4 interfaces hosted at https://github.com/dftd3/simple-dftd3 and
+https://github.com/dftd4/dftd4 . They can be installed via pypi packages
+
+pip install dftd3 dftd4
+
+See also discussions in https://github.com/pyscf/dftd3/issues/3
+''')

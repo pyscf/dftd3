@@ -1,24 +1,35 @@
 DFT-D3 interface
 ================
 
-2021-02-27
+pyscf-dftd3 extension is deprecated. It is recommended to use the newest DFTD3
+and DFTD4 interfaces hosted at https://github.com/dftd3/simple-dftd3 and
+https://github.com/dftd4/dftd4 . They can be installed via pypi packages
 
-* Version 0.1
-
-Install
--------
-* Install to python site-packages folder
 ```
-pip install git+https://github.com/pyscf/dftd3
+pip install dftd3 dftd4
 ```
 
-* Install in a custom folder for development
-```
-git clone https://github.com/pyscf/dftd3 /home/abc/local/path
+dftd3 package provides a drop-in replacement of pyscf.dftd3.itrf. For example
 
-# Set pyscf extended module path
-echo 'export PYSCF_EXT_PATH=/home/abc/local/path:$PYSCF_EXT_PATH' >> ~/.bashrc
+```
+from pyscf import gto
+import dftd3.pyscf as itrf
+
+mol = gto.M(
+    atom = ''' O    0.00000000    0.00000000   -0.11081188
+               H   -0.00000000   -0.84695236    0.59109389
+               H   -0.00000000    0.89830571    0.52404783 ''',
+    basis = 'cc-pvdz')
+
+mf = itrf.dftd3(mol.RHF())
+print(mf.kernel())
+
+mf.Gradients()
+mf.kernel()
 ```
 
-You can find more details of extended modules in the document
-[extension modules](http://pyscf.org/install.html#extension-modules)
+See also discussions in https://github.com/pyscf/dftd3/issues/3
+and the instructions for dftd3
+https://github.com/awvwgk/simple-dftd3/blob/main/python/README.rst#pyscf-support
+and dftd4
+https://github.com/dftd4/dftd4/tree/main/python#pyscf-support
