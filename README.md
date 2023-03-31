@@ -13,7 +13,7 @@ dftd3 package provides a drop-in replacement of pyscf.dftd3.itrf. For example
 
 ```
 from pyscf import gto
-import dftd3.pyscf as itrf
+import dftd3.pyscf as d3
 
 mol = gto.M(
     atom = ''' O    0.00000000    0.00000000   -0.11081188
@@ -21,7 +21,7 @@ mol = gto.M(
                H   -0.00000000    0.89830571    0.52404783 ''',
     basis = 'cc-pvdz')
 
-mf = itrf.dftd3(mol.RHF())
+mf = d3.energy(mol.RHF())
 print(mf.kernel())
 
 mf.Gradients()
@@ -30,6 +30,6 @@ mf.kernel()
 
 See also discussions in https://github.com/pyscf/dftd3/issues/3
 and the instructions for dftd3
-https://github.com/awvwgk/simple-dftd3/blob/main/python/README.rst#pyscf-support
+https://dftd3.readthedocs.io/en/latest/api/pyscf.html
 and dftd4
-https://github.com/dftd4/dftd4/tree/main/python#pyscf-support
+https://dftd4.readthedocs.io/en/latest/reference/pyscf.html
